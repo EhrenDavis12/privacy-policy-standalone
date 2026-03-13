@@ -35,3 +35,22 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  sync-app-ads:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push app-ads.txt to root GitHub Pages repo
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/EhrenDavis12/EhrenDavis12.github.io.git /tmp/root-pages
+          cp app-ads.txt /tmp/root-pages/app-ads.txt
+          cd /tmp/root-pages
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add app-ads.txt
+          git diff --staged --quiet && echo "No changes to app-ads.txt" || \
+            git commit -m "sync: update app-ads.txt from privacy-policy-standalone" && git push
